@@ -1,2 +1,3 @@
 # Diagnosis-of-Diabetic-Retinopathy-using-CNN
-# Hello
+# DR is one of the major causes of visual impairment among diabetic patients worldwide. The complications are grave, but early detection and treatment can prevent them; however, accessing specialized eye care is limited in many parts of the world, especially in remote and under-resourced regions. Traditional diagnosis methods are cumbersome, expensive, and dependent on specialists, delaying diagnosis and thus treatment.
+
