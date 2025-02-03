@@ -1,7 +1,9 @@
 # Diagnosis of Diabetic Retinopathy using CNN 
-Problem Statement 
+# Problem Statement: 
+
 DR is one of the major causes of visual impairment among diabetic patients worldwide. The complications are grave, but early detection and treatment can prevent them; however, accessing specialized eye care is limited in many parts of the world, especially in remote and under-resourced regions. Traditional diagnosis methods are cumbersome, expensive, and dependent on specialists, delaying diagnosis and thus treatment. 
 Project Strategy 
+
 This strategy emphasizes using CNNs for addressing the major requirement for DR accurate diagnosis in a friendly and accessible way. With AI techniques being applied in scalable platforms, the project can be an initiative towards transformation of eye care in less-endowed parts and advance boundaries for AI research as well. 
 Project Purpose 
  Detect DR accurately from fundus images. (internal images) 
@@ -9,6 +11,7 @@ Provide early intervention opportunities to prevent blindness.
 Enhance healthcare accessibility by minimizing dependency on specialists. 
 Improve diagnostic efficiency for clinicians with multi-condition assessments. 
 Project Vision 
+
 To revolutionize diabetic retinopathy diagnosis and eye health assessment by creating an accessible, accurate, and scalable AI-powered solution, reducing preventable blindness globally. 
 Project Mission 
 Design and deploy an AI-based system that uses CNNs to offer early and accurate DR detection, personalized progression monitoring, and comprehensive eye health analysis, all to ensure equitable healthcare for all, especially for the underserved. 
@@ -26,6 +29,7 @@ Use Case 3: Comprehensive Eye Health Analysis
 •	Impact: Provides a holistic eye health assessment, saving time and improving diagnostic efficiency for healthcare providers. 
  
 Tactics 
+
 To achieve the project’s goals, these tactics will be implemented: 
 1. Technology Development 
 	• 	Use transfer learning with pre-trained CNNs (e.g., ResNet) to reduce development time. 
@@ -46,6 +50,7 @@ To achieve the project’s goals, these tactics will be implemented:
 
 
 (2) Highlight on how our project is relevant to people, industry, the environment, culture, the economy:
+
 Use Case 1: Automated Diabetic Retinopathy Screening
 Relevance:
 •	People: Enables individuals access early screening and treatment, reducing the risk of blindness due to late-stage diabetic retinopathy.
@@ -53,6 +58,7 @@ Relevance:
 •	Environment: Reduces the need for frequent long-distance travel to specialized medical centres, decreasing carbon emissions and environmental impact.
 •	Culture: Encourages health awareness and proactive management of diabetes-related complications within communities that traditionally lack access to specialized healthcare.
 •	Economy: Cost-effective screening solutions help reduce the financial burden on healthcare systems by detecting the disease early and preventing expensive late-stage treatments.
+
 
 Use Case 2: Monitoring Disease Progression
 Relevance:
@@ -62,8 +68,6 @@ Relevance:
 •	Culture: Encourages a shift toward preventive healthcare culture, promoting regular eye health check-ups and reducing diabetes-related stigma.
 •	Economy: Reduces healthcare costs by preventing complications through early detection and continuous tracking, leading to fewer hospital admissions and lower insurance claims.
 
-
-
 Use Case 3: Comprehensive Eye Health Analysis
 Relevance:
 •	People: Expands beyond diabetic retinopathy to detect other vision-related disorders such as glaucoma and cataracts, improving overall eye health management.
@@ -71,6 +75,7 @@ Relevance:
 •	Environment: Efficient and automated AI diagnostics reduce the need for physical medical infrastructure, optimizing resources and lowering waste.
 •	Culture: Promotes a holistic approach to eye care, encouraging communities to prioritize routine screenings and eye health education.
 •	Economy: Boosts productivity by minimizing vision-related work disabilities and absenteeism, contributing to a more efficient workforce.
+
 
 (3) Use case’s Citation’s:
 
