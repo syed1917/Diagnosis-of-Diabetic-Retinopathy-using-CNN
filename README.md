@@ -30,7 +30,7 @@ Use Case 3: Comprehensive Eye Health Analysis
  
 Tactics 
 
-To achieve the project’s goals, these tactics will be implemented: 
+To achieve the projects goals, these tactics will be implemented: 
 1. Technology Development 
 	• 	Use transfer learning with pre-trained CNNs (e.g., ResNet) to reduce development time. 
 2.	Data and Model Preparation 
@@ -77,7 +77,7 @@ Relevance:
 •	Economy: Boosts productivity by minimizing vision-related work disabilities and absenteeism, contributing to a more efficient workforce.
 
 
-(3) Use case’s Citation’s:
+(3) Use cases Citations:
 
 Use Case 1: Automated Diabetic Retinopathy Screenin
 Natarajan, S., Jain, A., Krishnan, R., Rogye, A., & Sivaprasad, S. (2019). Diagnostic accuracy of Community-Based diabetic retinopathy screening with an offline artificial intelligence system on a smartphone. JAMA Ophthalmology, 137(10), 1182. https://doi.org/10.1001/jamaophthalmol.2019.2923
