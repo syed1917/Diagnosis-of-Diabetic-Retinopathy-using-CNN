@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Diagnosis Completed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('/static/image.png') no-repeat center center fixed;
+            background-size: cover;
+            text-align: center;
+            color: white;
+        }
+        .report-box {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            width: 60%;
+            margin: auto;
+            margin-top: 50px;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.3);
+        }
+        .insights-container {
+            text-align: left;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .insight {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+        .download-btn, .back-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+        .download-btn {
+            background: green;
+        }
+        .back-btn {
+            background: #007bff;
+        }
+        .separator {
+            border-bottom: 2px solid white;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="report-box">
+        <h2>Diagnosis Completed</h2>
+        <p><strong>Patient Name:</strong> {{ name }}</p>
+        <p><strong>Gender:</strong> {{ gender }}</p>
+        <p><strong>Age:</strong> {{ age }}</p>
+
+        <div class="separator"></div>
+
+        <h3>Diagnosis Result:</h3>
+
+        {% if insights %}
+            <div class="insights-container">
+                {% for key, value in insights.items() %}
+                    <div class="insight">
+                        <h3><strong>{{ key.replace("_", " ").title() }}:</strong></h3>
+                        {% for line in value.split(". ") %}  {# Split into separate lines for formatting #}
+                            <p>{{ line }}.</p>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No diagnosis insights available.</p>
+        {% endif %}
+
+
+        <div>
+            <a href="{{ url_for('serve_pdf', filename=pdf_report_path.split('/')[-1]) }}" class="download-btn">Download Report</a>
+            <a href="{{ url_for('dashboard') }}" class="back-btn">Back to Dashboard</a>
+        </div>
+    </div>
+
+</body>
+</html>
