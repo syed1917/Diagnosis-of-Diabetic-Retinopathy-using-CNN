@@ -6,7 +6,7 @@ Install Python
 https://www.python.org/downloads/
 
 Clone the Repository 
-- git clone -b Use-Case-1 https://github.com/syed1917/Diagnosis-of-Diabetic-Retinopathy-using-CNN
+- git clone -b Sprint-1 https://github.com/syed1917/Diagnosis-of-Diabetic-Retinopathy-using-CNN
 - cd Diagnosis-of-Diabetic-Retinopathy-using-CNN
 
 Create Virtual Environment & Install Dependencies 
