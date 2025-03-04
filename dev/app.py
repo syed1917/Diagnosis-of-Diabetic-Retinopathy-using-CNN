@@ -15,7 +15,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Load CNN Model
-model = load_model('D:\Diagnosis-of-Diabetic-Retinopathy-using-CNN\dev\diabetic_retinopathy_model.h5')
+model = load_model('dev/diabetic_retinopathy_model.h5')
 
 # Initialize Database
 conn = sqlite3.connect('users.db', check_same_thread=False)
