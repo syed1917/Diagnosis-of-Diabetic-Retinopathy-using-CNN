@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>New Patient Diagnosis</title>
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
+    <script>
+        function goBack() {
+            window.location.href = '/dashboard';
+        }
+        function showLoading() {
+            document.getElementById('form-container').style.display = 'none';
+            document.getElementById('loading-container').style.display = 'block';
+        }
+    </script>
+    <style>
+        body {
+            background: url('/static/image.png') no-repeat center center fixed;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .form-container, .loading-container {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input, select, button {
+            margin: 10px 0;
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="form-container" class="form-container">
+        <h2>New Patient Diagnosis</h2>
+        <form action="/new_patient" method="post" enctype="multipart/form-data" onsubmit="showLoading()">
+            <label for="name">Full Name:</label>
+            <input type="text" id="name" name="name" required>
+            <br>
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" required>
+            <br>
+            <label for="gender">Gender:</label>
+            <select id="gender" name="gender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+            <br>
+            <label for="eye_issue">Previous Eye Issues:</label>
+            <input type="text" id="eye_issue" name="eye_issue">
+            <br>
+            <label for="diabetes">Diabetes:</label>
+            <select id="diabetes" name="diabetes" required>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+            <br>
+            <label for="duration">Diabetes Duration (Years):</label>
+            <input type="number" id="duration" name="duration">
+            <br>
+            <label for="image">Upload Retina Image:</label>
+            <input type="file" id="image" name="image" accept="image/*" required>
+            <br>
+            <button type="submit">Submit Diagnosis</button>
+        </form>
+        <button onclick="goBack()">Back to Dashboard</button>
+    </div>
+    
+    <div id="loading-container" class="loading-container" style="display: none;">
+        <h2>Analyzing Data...</h2>
+        <p>Diabetic Retinopathy analysis in progress. This might take some time.</p>
+    </div>
+</body>
+</html>

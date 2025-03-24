@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Existing Patients</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('/static/image.png') no-repeat center center fixed;
+            background-size: cover;
+            text-align: center;
+            color: white;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            margin: auto;
+            margin-top: 50px;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.3);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid white;
+            text-align: left;
+        }
+        th {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        td a {
+            color: #00bfff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        td a:hover {
+            text-decoration: underline;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            background: #007bff;
+            font-weight: bold;
+        }
+        .image-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+        }
+        .no-patients {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Existing Patients</h2>
+
+        {% if patients %}
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Previous Eye Issues</th>
+                    <th>Diabetes</th>
+                    <th>Duration (Years)</th>
+                    <th>Retina Image</th>
+                </tr>
+                {% for patient in patients %}
+                    <tr>
+                        <td><a href="{{ url_for('view_patient', patient_id=patient[0]) }}">{{ patient[1] }}</a></td>
+                        <td>{{ patient[2] }}</td>
+                        <td>{{ patient[3] }}</td>
+                        <td>{{ patient[4] if patient[4] else 'None' }}</td>
+                        <td>{{ patient[5] if patient[5] else 'No' }}</td>
+                        <td>{{ patient[6] if patient[6] else '0' }} years</td>
+                        <td>
+                            {% if patient[7] %}
+                                <img src="{{ url_for('static', filename=patient[7].split('/')[-1]) }}" class="image-preview" alt="Retina Image">
+                            {% else %}
+                                No Image
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p class="no-patients">No existing patients found.</p>
+        {% endif %}
+
+        <a href="{{ url_for('dashboard') }}" class="back-btn">Back to Dashboard</a>
+    </div>
+
+</body>
+</html>
