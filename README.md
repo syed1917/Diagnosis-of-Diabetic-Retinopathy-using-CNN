@@ -135,15 +135,15 @@ https://www.python.org/downloads/
 
 Clone the Repository 
 - git clone -b Use-Case-1 https://github.com/syed1917/Diagnosis-of-Diabetic-Retinopathy-using-CNN
+- cd Diagnosis-of-Diabetic-Retinopathy-using-CNN
 
 Create Virtual Environment & Install Dependencies 
 - python -m venv dr_venv
 - .\dr_venv\Scripts\Activate.ps1
 - pip install flask fpdf pillow tensorflow
 
-Run the Flask Application
-- cd Diagnosis-of-Diabetic-Retinopathy-using-CNN
-- python app.py
+Run the Flask Application 
+- python dev/app.py
 
 Access the Application in the Browser 
 - http://127.0.0.1:5000/
