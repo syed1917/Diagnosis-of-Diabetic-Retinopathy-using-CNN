@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  web:
+    container_name: diabetic_retinopathy_app
+    build:
+      context: .  # Build from the current directory
+      dockerfile: Dockerfile  # Specify the Dockerfile
+    ports:
+      - "5000:5000"  # Map container port 5000 to local port 5000
+    volumes:
+      - ./uploads:/app/uploads  # Ensure folder exists before running
+      - ./users.db:/app/users.db  # Ensure users.db exists before running
+    environment:
+      - FLASK_ENV=production
+    restart: always  # Automatically restart the container if it crashes
