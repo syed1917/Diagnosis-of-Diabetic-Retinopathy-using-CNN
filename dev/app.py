@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 import sqlite3
 import os
-import logging
 import tensorflow as tf
 import numpy as np
 from werkzeug.utils import secure_filename
@@ -15,16 +14,8 @@ UPLOAD_FOLDER = 'uploads/'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Logging setup
-logging.basicConfig(
-    filename='app.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
 # Load CNN Model
-model = load_model('diabetic_retinopathy_model.h5')
+model = load_model('dev/diabetic_retinopathy_model.h5')
 
 # Initialize Database
 conn = sqlite3.connect('users.db', check_same_thread=False)
@@ -191,7 +182,6 @@ def login():
 
         if user:
             session['user'] = username
-            logger.info(f"User '{username}' logged in.")
             return jsonify({"redirect": url_for('dashboard')})  # Redirect via JSON response
         else:
             return jsonify({"error": "Invalid credentials"}), 401  # Send error response
@@ -249,12 +239,10 @@ def new_patient():
             # Process Image for CNN Model
             img_array = preprocess_image(image_path)
             prediction = model.predict(img_array)[0]
-            logger.info(f"Prediction made for patient '{name}' with result: {prediction}")
             insights = generate_insights(prediction)
 
             # Generate PDF Report
             pdf_report_path = generate_pdf(name, age, gender, eye_issue, diabetes, duration, image_path, insights)
-            logger.info(f"PDF report generated for patient '{name}' at '{pdf_report_path}'")
 
             # Save to Database
             conn = sqlite3.connect('users.db')
@@ -290,7 +278,7 @@ def update_patient(patient_id):
     conn.commit()
     conn.close()
     
-    return redirect(url_for('existing_patients'))
+    return redirect(url_for('existing_patient'))
 
 # Existing Patient Route
 @app.route('/existing_patients')
@@ -337,4 +325,4 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(debug=True)
