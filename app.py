@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 import sqlite3
-import os
+import os, sys
 import logging
 import tensorflow as tf
 import numpy as np
@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 from fpdf import FPDF
+from pdf_generator import generate_pdf 
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Required for session management
@@ -15,13 +16,21 @@ UPLOAD_FOLDER = 'uploads/'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Logging setup
-logging.basicConfig(
-    filename='app.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# Logging setup: log to both file and console
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# File handler
+file_handler = logging.FileHandler('app.log')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+
+# Console handler
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
 
 # Load CNN Model
 model = load_model('diabetic_retinopathy_model.h5')
@@ -142,37 +151,6 @@ def generate_insights(prediction):
         )
     }
     return insights
-
-def generate_pdf(name, age, gender, eye_issue, diabetes, duration, image_path, insights):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, "Diabetic Retinopathy Diagnosis Report", ln=True, align='C')
-    pdf.ln(10)
-    
-    # Patient Details in Left, Image in Right
-    pdf.cell(100, 10, f"Patient Name: {name}", ln=True)
-    pdf.cell(100, 10, f"Age: {age}", ln=True)
-    pdf.cell(100, 10, f"Gender: {gender}", ln=True)
-    pdf.cell(100, 10, f"Previous Eye Issues: {eye_issue}", ln=True)
-    pdf.cell(100, 10, f"Diabetes: {diabetes}", ln=True)
-    pdf.cell(100, 10, f"Diabetes Duration: {duration} years", ln=True)
-    pdf.image(image_path, x=140, y=30, w=50)
-    pdf.ln(60)
-    pdf.cell(0, 10, "____________________________________________________", ln=True, align='C')
-    pdf.ln(3)
-    
-    # AI-Generated Insights
-    for key, value in insights.items():
-        pdf.set_font("Arial", style='B', size=12)
-        pdf.cell(0, 10, f"{key.replace('_', ' ').title()}:", ln=True)
-        pdf.set_font("Arial", size=12)
-        pdf.multi_cell(0, 10, f"{value}\n")
-        pdf.ln(5)
-    
-    pdf_path = f"uploads/{name}_diagnosis_report.pdf"
-    pdf.output(pdf_path)
-    return pdf_path
 
 
 # Home (Login) Route
@@ -329,6 +307,36 @@ def view_patient(patient_id):
     insights = generate_insights(prediction)
 
     return render_template('result.html', name=name, age=age, gender=gender, eye_issue=eye_issue, diabetes=diabetes, duration=duration, pdf_report_path=pdf_report_path, insights=insights)
+
+@app.route('/generate_report', methods=['POST'])
+def generate_report_api():
+    from datetime import datetime
+
+    data = request.get_json(force=True)
+
+    required_fields = ['name', 'age', 'gender', 'eye_issue', 'diabetes', 'duration', 'image_path', 'insights']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+
+    try:
+        logger.info(f"[PDF Pipeline] Starting report generation for {data['name']}")
+        pdf_path = generate_pdf(
+            data['name'],
+            data['age'],
+            data['gender'],
+            data['eye_issue'],
+            data['diabetes'],
+            data['duration'],
+            data['image_path'],
+            data['insights']
+        )
+        logger.info(f"[PDF Pipeline] Report generated at: {pdf_path}")
+        return jsonify({"pdf_path": os.path.join(app.config['UPLOAD_FOLDER'], pdf_path)}), 200
+    except Exception as e:
+        logger.error(f"[PDF Pipeline] Failed to generate PDF: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 
 # Logout Route
 @app.route('/logout')
