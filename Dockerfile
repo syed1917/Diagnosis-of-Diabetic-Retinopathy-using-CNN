@@ -6,6 +6,8 @@ WORKDIR /app
 
 # Copy application files (main app)
 COPY app.py /app/
+COPY pdf_generator.py /app/
+
 
 # Copy the TensorFlow model
 COPY diabetic_retinopathy_model.h5 /app/
