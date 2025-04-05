@@ -1,8 +1,11 @@
-Diagnosis of Diabetic Retinopathy using CNN 
-Problem Statement: 
+# Diagnosis of Diabetic Retinopathy using CNN 
+
+
+## Problem Statement: 
 
 DR is one of the major causes of visual impairment among diabetic patients worldwide. The complications are grave, but early detection and treatment can prevent them; however, accessing specialized eye care is limited in many parts of the world, especially in remote and under-resourced regions. Traditional diagnosis methods are cumbersome, expensive, and dependent on specialists, delaying diagnosis and thus treatment. 
-Project Strategy 
+
+## Project Strategy 
 
 This strategy emphasizes using CNNs for addressing the major requirement for DR accurate diagnosis in a friendly and accessible way. With AI techniques being applied in scalable platforms, the project can be an initiative towards transformation of eye care in less-endowed parts and advance boundaries for AI research as well. 
 Project Purpose 
@@ -15,20 +18,20 @@ Project Vision
 To revolutionize diabetic retinopathy diagnosis and eye health assessment by creating an accessible, accurate, and scalable AI-powered solution, reducing preventable blindness globally. 
 Project Mission 
 Design and deploy an AI-based system that uses CNNs to offer early and accurate DR detection, personalized progression monitoring, and comprehensive eye health analysis, all to ensure equitable healthcare for all, especially for the underserved. 
-Use Case 1: Automated Diabetic Retinopathy Screening
+### Use Case 1: Automated Diabetic Retinopathy Screening
 •	Goal: Provide a model for diabetic retinopathy (DR) in clinics without access to eye specialists. 
 •	How: Use a CNN-based model to analyse fundus images and detect DR in real-time.  
 •	Impact: Enables early detection, reducing the risk of blindness and ensuring timely treatment. 
-Use Case 2: Monitoring Disease Progression 
+### Use Case 2: Monitoring Disease Progression 
 •	Goal: Track the progression of diabetic retinopathy in patients over time. 
 •	How: Combine CNNs and LSTMs to analyse chronological fundus images and predict whether the condition is improving or worsening. Integrate patient data for personalized monitoring. 
 •	Impact: Helps healthcare providers adjust treatments early and improve patient outcomes. 
-Use Case 3: Comprehensive Eye Health Analysis 
+### Use Case 3: Comprehensive Eye Health Analysis 
 •	Goal: Diagnose diabetic retinopathy along with other eye conditions like glaucoma and macular enema. 
 •	How: Use a multi-task CNN model to identify multiple conditions from a single fundus image, with separate outputs for each diagnosis. 
 •	Impact: Provides a holistic eye health assessment, saving time and improving diagnostic efficiency for healthcare providers. 
  
-Tactics 
+## Tactics 
 
 To achieve the projects goals, these tactics will be implemented: 
 1. Technology Development 
@@ -127,33 +130,55 @@ These use cases represent a forward-thinking, cost-effective, and patient-centri
 
 
 
+# Setup and Run Instructions (Local System)
+1. Install Python
 
-Setup and Run Instructions
-
-Install Python
+- Download and install Python from the official website:
 https://www.python.org/downloads/
 
-Clone the Repository 
+2. Clone the Repository
+
 - git clone -b Use-Case-1 https://github.com/syed1917/Diagnosis-of-Diabetic-Retinopathy-using-CNN
 - cd Diagnosis-of-Diabetic-Retinopathy-using-CNN
 
-Create Virtual Environment & Install Dependencies 
+3. Create Virtual Environment & Install Dependencies
+
 - python -m venv dr_venv
-- .\dr_venv\Scripts\Activate.ps1
+- .\dr_venv\Scripts\Activate.ps1			# For Windows PowerShell
+source dr_venv/bin/activate			# For Linux/macOS users
+
 - pip install flask fpdf pillow tensorflow
 
-Run the Flask Application 
-- python dev/app.py
+4. Run the Flask Application
 
-Access the Application in the Browser 
-- http://127.0.0.1:5000/
+- python app.py
+
+5. Access the Application
+
+- Open your browser and visit:
+http://127.0.0.1:5000/
 
 
 
-Notes
-- Ensure the diabetic_retinopathy_model.h5 file is in the project directory.
-- The uploads/ folder should have written permissions for storing images and PDFs.
-- Logging is enabled to capture server activity.
-- We used 50 epochs to train the CNN model, and we were not able to use more epochs due to computational barriers.
-- After diagnosis, a PDF report is generated using FPDF and stored for clinician review.
-- The report contains AI-generated insights, risk assessment, and follow-up recommendations.
+Notes:
+
+- Ensure the file diabetic_retinopathy_model.h5 is present in the project root directory.
+- The uploads/ folder must have write permissions for storing uploaded images and generated PDF reports.
+- Logging is enabled to capture server activity for monitoring and debugging.
+- The CNN model was trained using 50 epochs due to computational limitations.
+- After diagnosis, a PDF report is generated using FPDF, which includes:
+	- AI-generated insights
+	- Risk assessment
+	- Follow-up recommendations
+
+Docker Instructions
+
+1. Run Docker Container Locally
+- Login to Docker and use the following command:
+docker-compose up --build
+- Then, go to the running container and access the web app via its local IP or port.
+
+2. Push Image to Docker Hub
+Tag and push the image to Docker Hub:
+- docker tag diagnosis-of-diabetic-retinopathy-using-cnn-web:latest gmwrites/aiml2025:logs
+- docker push gmwrites/aiml2025:logs
