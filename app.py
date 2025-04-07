@@ -8,13 +8,24 @@ from werkzeug.utils import secure_filename
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 from fpdf import FPDF
-from pdf_generator import generate_pdf 
+from pdf_generator import generate_pdf
+def read_secret(secret_name, default=None):
+    try:
+        with open(f"/run/secrets/{secret_name}") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return default
+
+UPLOAD_FOLDER = read_secret('UPLOAD_FOLDER', 'uploads/')
+MODEL_PATH = read_secret('MODEL_NAME', 'diabetic_retinopathy_model.h5')
+SECRET_KEY = read_secret('SECRET_KEY', 'fallback_secret_key')
+
+model = load_model(MODEL_PATH)
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Required for session management
-UPLOAD_FOLDER = 'uploads/'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.secret_key = SECRET_KEY
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 
 # Logging setup: log to both file and console
 logger = logging.getLogger()
@@ -31,9 +42,6 @@ logger.addHandler(file_handler)
 console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
-
-# Load CNN Model
-model = load_model('diabetic_retinopathy_model.h5')
 
 # Initialize Database
 conn = sqlite3.connect('users.db', check_same_thread=False)
