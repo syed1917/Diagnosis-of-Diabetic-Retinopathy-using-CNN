@@ -1,0 +1,17 @@
+[[rules]]
+id = "db-user"
+description = "Hardcoded DB Username"
+regex = '''DB_USER[=]["'\s]*[a-zA-Z0-9-_]+'''
+tags = ["dbuser"]
+
+[[rules]]
+id = "secret-key"
+description = "Hardcoded Secret Key"
+regex = '''SECRET_KEY[=]["'\s]*[a-zA-Z0-9-_]+'''
+tags = ["secretkey"]
+
+[[rules]]
+id = "model-name"
+description = "TensorFlow Model Name"
+regex = '''model[=]["'\s]*diabetic_retinopathy_model\.h5["']'''
+tags = ["modelname"]

@@ -1,21 +1,47 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 import sqlite3
-import os
+import os, sys
+import logging
 import tensorflow as tf
 import numpy as np
 from werkzeug.utils import secure_filename
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 from fpdf import FPDF
+from pdf_generator import generate_pdf
+def read_secret(secret_name, default=None):
+    try:
+        with open(f"/run/secrets/{secret_name}") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return default
+
+UPLOAD_FOLDER = read_secret('UPLOAD_FOLDER', 'uploads/')
+MODEL_PATH = read_secret('MODEL_NAME', 'diabetic_retinopathy_model.h5')
+SECRET_KEY = read_secret('SECRET_KEY', 'fallback_secret_key')
+
+model = load_model(MODEL_PATH)
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Required for session management
-UPLOAD_FOLDER = 'uploads/'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.secret_key = SECRET_KEY
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Load CNN Model
-model = load_model('dev/diabetic_retinopathy_model.h5')
+
+# Logging setup: log to both file and console
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# File handler
+file_handler = logging.FileHandler('app.log')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+
+# Console handler
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
 
 # Initialize Database
 conn = sqlite3.connect('users.db', check_same_thread=False)
@@ -134,37 +160,6 @@ def generate_insights(prediction):
     }
     return insights
 
-def generate_pdf(name, age, gender, eye_issue, diabetes, duration, image_path, insights):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, "Diabetic Retinopathy Diagnosis Report", ln=True, align='C')
-    pdf.ln(10)
-    
-    # Patient Details in Left, Image in Right
-    pdf.cell(100, 10, f"Patient Name: {name}", ln=True)
-    pdf.cell(100, 10, f"Age: {age}", ln=True)
-    pdf.cell(100, 10, f"Gender: {gender}", ln=True)
-    pdf.cell(100, 10, f"Previous Eye Issues: {eye_issue}", ln=True)
-    pdf.cell(100, 10, f"Diabetes: {diabetes}", ln=True)
-    pdf.cell(100, 10, f"Diabetes Duration: {duration} years", ln=True)
-    pdf.image(image_path, x=140, y=30, w=50)
-    pdf.ln(60)
-    pdf.cell(0, 10, "____________________________________________________", ln=True, align='C')
-    pdf.ln(3)
-    
-    # AI-Generated Insights
-    for key, value in insights.items():
-        pdf.set_font("Arial", style='B', size=12)
-        pdf.cell(0, 10, f"{key.replace('_', ' ').title()}:", ln=True)
-        pdf.set_font("Arial", size=12)
-        pdf.multi_cell(0, 10, f"{value}\n")
-        pdf.ln(5)
-    
-    pdf_path = f"uploads/{name}_diagnosis_report.pdf"
-    pdf.output(pdf_path)
-    return pdf_path
-
 
 # Home (Login) Route
 @app.route('/')
@@ -182,6 +177,7 @@ def login():
 
         if user:
             session['user'] = username
+            logger.info(f"User '{username}' logged in.")
             return jsonify({"redirect": url_for('dashboard')})  # Redirect via JSON response
         else:
             return jsonify({"error": "Invalid credentials"}), 401  # Send error response
@@ -239,10 +235,12 @@ def new_patient():
             # Process Image for CNN Model
             img_array = preprocess_image(image_path)
             prediction = model.predict(img_array)[0]
+            logger.info(f"Prediction made for patient '{name}' with result: {prediction}")
             insights = generate_insights(prediction)
 
             # Generate PDF Report
             pdf_report_path = generate_pdf(name, age, gender, eye_issue, diabetes, duration, image_path, insights)
+            logger.info(f"PDF report generated for patient '{name}' at '{pdf_report_path}'")
 
             # Save to Database
             conn = sqlite3.connect('users.db')
@@ -278,7 +276,7 @@ def update_patient(patient_id):
     conn.commit()
     conn.close()
     
-    return redirect(url_for('existing_patient'))
+    return redirect(url_for('existing_patients'))
 
 # Existing Patient Route
 @app.route('/existing_patients')
@@ -318,6 +316,36 @@ def view_patient(patient_id):
 
     return render_template('result.html', name=name, age=age, gender=gender, eye_issue=eye_issue, diabetes=diabetes, duration=duration, pdf_report_path=pdf_report_path, insights=insights)
 
+@app.route('/generate_report', methods=['POST'])
+def generate_report_api():
+    from datetime import datetime
+
+    data = request.get_json(force=True)
+
+    required_fields = ['name', 'age', 'gender', 'eye_issue', 'diabetes', 'duration', 'image_path', 'insights']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+
+    try:
+        logger.info(f"[PDF Pipeline] Starting report generation for {data['name']}")
+        pdf_path = generate_pdf(
+            data['name'],
+            data['age'],
+            data['gender'],
+            data['eye_issue'],
+            data['diabetes'],
+            data['duration'],
+            data['image_path'],
+            data['insights']
+        )
+        logger.info(f"[PDF Pipeline] Report generated at: {pdf_path}")
+        return jsonify({"pdf_path": os.path.join(app.config['UPLOAD_FOLDER'], pdf_path)}), 200
+    except Exception as e:
+        logger.error(f"[PDF Pipeline] Failed to generate PDF: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
 # Logout Route
 @app.route('/logout')
 def logout():
@@ -325,4 +353,4 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

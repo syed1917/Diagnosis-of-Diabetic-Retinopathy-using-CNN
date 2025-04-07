@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  web:
+    container_name: diabetic_retinopathy_app
+    build:
+      context: .  # Build from the current directory
+      dockerfile: Dockerfile  # Specify the Dockerfile
+    ports:
+      - "5000:5000"  # Map container port 5000 to local port 5000
+    env_file:
+      - .env  # Load environment variables from .env file
+    secrets:
+      - SECRET_KEY
+      - MODEL_NAME
+      - UPLOAD_FOLDER
+    volumes:
+      - ./uploads:/app/uploads  # Ensure folder exists before running
+      - ./users.db:/app/users.db  # Ensure users.db exists before running
+    environment:
+      - FLASK_ENV=production
+    restart: always  # Automatically restart the container if it crashes
+
+secrets:
+  SECRET_KEY:
+    file: ./secrets/SECRET_KEY
+  MODEL_NAME:
+    file: ./secrets/MODEL_NAME
+  UPLOAD_FOLDER:
+    file: ./secrets/UPLOAD_FOLDER
