@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
-import sqlite3
+import sqlite3, platform
 import os, sys
 import logging
 import tensorflow as tf
@@ -246,8 +246,20 @@ def new_patient():
 
             with mlflow.start_run(run_name=f"Diagnosis_{name}_{timestamp}"):
                 mlflow.set_tag("patient_name", name)
+                mlflow.set_tag("framework_version", tf.__version__)
+                mlflow.set_tag("python_version", platform.python_version())
                 mlflow.log_param("model_path", MODEL_PATH)
                 mlflow.log_param("image_filename", filename)
+                mlflow.log_param("model_type", "CNN-5layer")
+                mlflow.log_param("image_size", "224x224")
+                mlflow.log_param("preprocessing", "rescale + CLAHE")
+                mlflow.log_param("augmentation", "rotation, zoom, flip")
+                mlflow.log_param("doctor_input_eye_issue", eye_issue)
+                mlflow.log_param("diabetes_duration", duration)
+                mlflow.log_param("optimizer", "Adam")
+                mlflow.log_param("learning_rate", 0.0001)
+                mlflow.log_param("batch_size", 32)
+
 
                 # Model Inference
                 img_array = preprocess_image(image_path)
@@ -259,6 +271,12 @@ def new_patient():
                 predicted_label = np.argmax(prediction)
                 mlflow.log_metric("max_confidence", max_confidence)
                 mlflow.log_metric("predicted_class", predicted_label)
+                mlflow.log_metric("no_dr_conf", float(prediction[0]) * 100)
+                mlflow.log_metric("mild_conf", float(prediction[1]) * 100)
+                mlflow.log_metric("moderate_conf", float(prediction[2]) * 100)
+                mlflow.log_metric("severe_conf", float(prediction[3]) * 100)
+                mlflow.log_metric("proliferative_conf", float(prediction[4]) * 100)
+
 
                 # Generate Insights & PDF
                 insights = generate_insights(prediction)
