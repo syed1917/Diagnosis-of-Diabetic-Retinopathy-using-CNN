@@ -159,6 +159,10 @@ source dr_venv/bin/activate			# For Linux/macOS users
 http://127.0.0.1:5000/
 
 
+# To access ml-flow
+
+- mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 5050
+
 
 # Notes:
 
@@ -182,11 +186,6 @@ docker-compose up --build
 Tag and push the image to Docker Hub:
 - docker tag diagnosis-of-diabetic-retinopathy-using-cnn-web:latest gmwrites/aiml2025:logs
 - docker push gmwrites/aiml2025:logs
-
-
-# To access ml-flow
-
-- mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 5050
 
 
 # /predict API 

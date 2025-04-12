@@ -5,8 +5,8 @@ import logging
 import tensorflow as tf
 import numpy as np
 import mlflow
-mlflow.set_tracking_uri("http://localhost:5050")
-mlflow.set_registry_uri("http://localhost:5050")
+mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5050"))
+mlflow.set_registry_uri(os.getenv("MLFLOW_REGISTRY_URI", "http://localhost:5050"))
 from werkzeug.utils import secure_filename
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
