@@ -1,25 +1,47 @@
 version: "3.8"
 
 services:
-  web:
-    container_name: diabetic_retinopathy_app
-    build:
-      context: .  # Build from the current directory
-      dockerfile: Dockerfile  # Specify the Dockerfile
-    ports:
-      - "5000:5000"  # Map container port 5000 to local port 5000
-    env_file:
-      - .env  # Load environment variables from .env file
-    secrets:
-      - SECRET_KEY
-      - MODEL_NAME
-      - UPLOAD_FOLDER
-    volumes:
-      - ./uploads:/app/uploads  # Ensure folder exists before running
-      - ./users.db:/app/users.db  # Ensure users.db exists before running
-    environment:
-      - FLASK_ENV=production
-    restart: always  # Automatically restart the container if it crashes
+    web:
+      container_name: diabetic_retinopathy_app
+      build:
+        context: .
+        dockerfile: Dockerfile
+      ports:
+        - "5000:5000"
+      env_file:
+        - .env
+      secrets:
+        - SECRET_KEY
+        - MODEL_NAME
+        - UPLOAD_FOLDER
+      volumes:
+        - ./uploads:/app/uploads
+        - ./users.db:/app/users.db
+      environment:
+        - FLASK_ENV=production
+        - MLFLOW_TRACKING_URI=http://mlflow:5050
+        - MLFLOW_REGISTRY_URI=http://mlflow:5050
+      depends_on:
+        - mlflow
+      restart: always
+
+
+    mlflow:
+      image: ghcr.io/mlflow/mlflow:v2.10.0
+      container_name: mlflow_server
+      ports:
+        - "5050:5050"
+      environment:
+        - MLFLOW_BACKEND_STORE_URI=sqlite:///mlflow.db
+        - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
+      volumes:
+        - ./mlflow:/mlflow
+      command: mlflow server \
+        --backend-store-uri sqlite:///mlflow.db \
+        --default-artifact-root /mlflow/artifacts \
+        --host 0.0.0.0 \
+        --port 5050
+
 
 secrets:
   SECRET_KEY:

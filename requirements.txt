@@ -3,3 +3,4 @@ fpdf==1.7.2
 pillow==11.1.0
 tensorflow==2.19.0
 python-dotenv==1.1.0
+mlflow==2.21.3

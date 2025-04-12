@@ -4,6 +4,9 @@ import os, sys
 import logging
 import tensorflow as tf
 import numpy as np
+import mlflow
+mlflow.set_tracking_uri("http://localhost:5050")
+mlflow.set_registry_uri("http://localhost:5050")
 from werkzeug.utils import secure_filename
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
@@ -21,6 +24,12 @@ MODEL_PATH = read_secret('MODEL_NAME', 'diabetic_retinopathy_model.h5')
 SECRET_KEY = read_secret('SECRET_KEY', 'fallback_secret_key')
 
 model = load_model(MODEL_PATH)
+
+# Register model to MLflow
+with mlflow.start_run(run_name="Model_Registration"):
+    mlflow.set_tag("phase", "registration")
+    mlflow.keras.log_model(model, artifact_path="model", registered_model_name="DR_Diagnosis_CNN")
+
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
@@ -232,15 +241,35 @@ def new_patient():
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             image_file.save(image_path)
 
-            # Process Image for CNN Model
-            img_array = preprocess_image(image_path)
-            prediction = model.predict(img_array)[0]
-            logger.info(f"Prediction made for patient '{name}' with result: {prediction}")
-            insights = generate_insights(prediction)
+            import time
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 
-            # Generate PDF Report
-            pdf_report_path = generate_pdf(name, age, gender, eye_issue, diabetes, duration, image_path, insights)
-            logger.info(f"PDF report generated for patient '{name}' at '{pdf_report_path}'")
+            with mlflow.start_run(run_name=f"Diagnosis_{name}_{timestamp}"):
+                mlflow.set_tag("patient_name", name)
+                mlflow.log_param("model_path", MODEL_PATH)
+                mlflow.log_param("image_filename", filename)
+
+                # Model Inference
+                img_array = preprocess_image(image_path)
+                prediction = model.predict(img_array)[0]
+                logger.info(f"Prediction made for patient '{name}' with result: {prediction}")
+
+                # Log metrics
+                max_confidence = float(np.max(prediction)) * 100
+                predicted_label = np.argmax(prediction)
+                mlflow.log_metric("max_confidence", max_confidence)
+                mlflow.log_metric("predicted_class", predicted_label)
+
+                # Generate Insights & PDF
+                insights = generate_insights(prediction)
+                pdf_report_path = generate_pdf(name, age, gender, eye_issue, diabetes, duration, image_path, insights)
+                logger.info(f"PDF report generated for patient '{name}' at '{pdf_report_path}'")
+
+                # Log report as artifact
+                full_pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], os.path.basename(pdf_report_path))
+                mlflow.log_artifact(full_pdf_path)
+
+
 
             # Save to Database
             conn = sqlite3.connect('users.db')

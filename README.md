@@ -139,7 +139,6 @@ https://www.python.org/downloads/
 2. Clone the Repository
 
 - git clone -b Use-Case-1 https://github.com/syed1917/Diagnosis-of-Diabetic-Retinopathy-using-CNN
-- cd Diagnosis-of-Diabetic-Retinopathy-using-CNN
 
 3. Create Virtual Environment & Install Dependencies
 
@@ -147,10 +146,11 @@ https://www.python.org/downloads/
 - .\dr_venv\Scripts\Activate.ps1			# For Windows PowerShell
 source dr_venv/bin/activate			# For Linux/macOS users
 
-- pip install flask fpdf pillow tensorflow
+- pip install -r Diagnosis-of-Diabetic-Retinopathy-using-CNN/requirements.txt
 
 4. Run the Flask Application
 
+- cd Diagnosis-of-Diabetic-Retinopathy-using-CNN
 - python app.py
 
 5. Access the Application
@@ -160,7 +160,7 @@ http://127.0.0.1:5000/
 
 
 
-Notes:
+# Notes:
 
 - Ensure the file diabetic_retinopathy_model.h5 is present in the project root directory.
 - The uploads/ folder must have write permissions for storing uploaded images and generated PDF reports.
@@ -171,7 +171,7 @@ Notes:
 	- Risk assessment
 	- Follow-up recommendations
 
-Docker Instructions
+# Docker Instructions
 
 1. Run Docker Container Locally
 - Login to Docker and use the following command:
@@ -182,3 +182,9 @@ docker-compose up --build
 Tag and push the image to Docker Hub:
 - docker tag diagnosis-of-diabetic-retinopathy-using-cnn-web:latest gmwrites/aiml2025:logs
 - docker push gmwrites/aiml2025:logs
+
+
+# To access ml-flow
+
+- mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 5050
+
