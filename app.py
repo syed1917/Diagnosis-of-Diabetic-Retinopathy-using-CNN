@@ -392,6 +392,15 @@ def generate_report_api():
         logger.error(f"[PDF Pipeline] Failed to generate PDF: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+# Predict Route
+@app.route('/predict', methods=['POST'])
+def predict_rest():
+    data = request.get_json()
+    image_path = data['image_path']
+    img_array = preprocess_image(image_path)
+    prediction = model.predict(img_array)[0]
+    return jsonify(generate_insights(prediction))
+
 
 # Logout Route
 @app.route('/logout')

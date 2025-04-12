@@ -188,3 +188,10 @@ Tag and push the image to Docker Hub:
 
 - mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 5050
 
+
+# /predict API 
+
+curl -X POST http://localhost:5000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"image_path": "uploads/sample.jpg"}'
+
