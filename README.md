@@ -52,6 +52,7 @@ To achieve the projects goals, these tactics will be implemented:
  
 
 
+
 (2) Highlight on how our project is relevant to people, industry, the environment, culture, the economy:
 
 Use Case 1: Automated Diabetic Retinopathy Screening
