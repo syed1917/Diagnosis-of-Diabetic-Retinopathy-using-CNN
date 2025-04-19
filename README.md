@@ -185,13 +185,90 @@ docker-compose up --build
 
 2. Push Image to Docker Hub
 Tag and push the image to Docker Hub:
-- docker tag diagnosis-of-diabetic-retinopathy-using-cnn-web:latest gmwrites/aiml2025:logs
-- docker push gmwrites/aiml2025:logs
+- docker tag diagnosis-of-diabetic-retinopathy-using-cnn-web:latest gmwrites/aiml2025:final
+- docker push gmwrites/aiml2025:final
 
 
-# /predict API 
+# /predict API - ML pipeline
 
 curl -X POST http://localhost:5000/predict \
   -H "Content-Type: application/json" \
   -d '{"image_path": "uploads/sample.jpg"}'
+
+
+
+
+
+
+1. Docker Image Build & Containerization 
+
+✔ Dockerfile correctly packages Flask app, TensorFlow model, and all dependencies. 
+
+✔ Image is built using: docker-compose up --build 
+
+✔ Image is tagged and pushed to Docker Hub: docker tag diagnosis-of-diabetic-retinopathy-using-cnn-web:latest gmwrites/aiml2025:final 
+
+docker push gmwrites/aiml2025:final 
+
+ 
+
+✔ docker-compose.yml correctly builds and runs the container with ports, volumes, and secrets. 
+
+2. MLflow Integration & Model Tracking 
+
+✔ MLflow container defined and running on port 5050. 
+
+✔ Environment variables for MLFLOW_TRACKING_URI and MLFLOW_REGISTRY_URI are set. 
+
+✔ Model and experiment logs (metrics, params, artifacts) are captured during /new_patient route. 
+
+✔ Registration is conditionally triggered and avoids duplication with app-level flag. 
+
+3. REST API & Flask Web Application 
+
+✔ RESTful endpoints implemented: /login, /signup, /new_patient, /existing_patients, /predict. 
+
+✔ Proper routing for session handling, PDF generation, and image uploads. 
+
+✔ ML prediction works end-to-end from image upload to PDF generation. 
+
+4. Secrets Management 
+
+✔ Docker secrets used for hiding sensitive variables (SECRET_KEY, MODEL_NAME, etc.). 
+
+✔ .env file supports fallback for USE_MLFLOW, Flask config, etc. 
+
+✔ Code loads secrets dynamically from /run/secrets/*.  
+
+5. Vulnerability Testing (GitLeaks) 
+
+✔ .gitleaks.toml file is configured with rules to catch sensitive patterns. 
+
+✔ GitLeaks scan run locally before deployment to ensure no hardcoded credentials. 
+
+6. Logging & Monitoring 
+
+✔ app.py configured with logging to both console and app.log file. 
+
+✔ Each major action (login, prediction, PDF generation) is logged with timestamps. 
+
+✔ MLflow artifacts include the PDF report per patient. 
+
+7. Docker Compose Services 
+
+✔ docker-compose up starts both web and mlflow services correctly. 
+
+✔ Container logs can be viewed via docker logs diabetic_retinopathy_app. 
+
+✔ docker-compose down cleans up services after test run. 
+
+8. Deployment Verification 
+
+✔ Application accessible via http://localhost:5000 or assigned public IP. 
+
+✔ MLflow UI accessible via http://localhost:5050. 
+
+✔ Able to run new diagnosis and generate PDF with results. 
+
+✔ Database persists user and patient records (users.db mounted). 
 
