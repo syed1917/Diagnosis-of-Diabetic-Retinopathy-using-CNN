@@ -21,6 +21,8 @@ services:
         - FLASK_ENV=production
         - MLFLOW_TRACKING_URI=http://mlflow:5050
         - MLFLOW_REGISTRY_URI=http://mlflow:5050
+        - USE_MLFLOW=true
+
       depends_on:
         - mlflow
       restart: always

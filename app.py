@@ -4,9 +4,13 @@ import os, sys
 import logging
 import tensorflow as tf
 import numpy as np
-import mlflow
-mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5050"))
-mlflow.set_registry_uri(os.getenv("MLFLOW_REGISTRY_URI", "http://localhost:5050"))
+mlflow_enabled = os.getenv("USE_MLFLOW", "true").lower() == "true"
+
+if mlflow_enabled:
+    import mlflow
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5050"))
+    mlflow.set_registry_uri(os.getenv("MLFLOW_REGISTRY_URI", "http://localhost:5050"))
+
 from werkzeug.utils import secure_filename
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
@@ -24,12 +28,6 @@ MODEL_PATH = read_secret('MODEL_NAME', 'diabetic_retinopathy_model.h5')
 SECRET_KEY = read_secret('SECRET_KEY', 'fallback_secret_key')
 
 model = load_model(MODEL_PATH)
-
-# Register model to MLflow
-with mlflow.start_run(run_name="Model_Registration"):
-    mlflow.set_tag("phase", "registration")
-    mlflow.keras.log_model(model, artifact_path="model", registered_model_name="DR_Diagnosis_CNN")
-
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
@@ -221,11 +219,11 @@ def dashboard():
         return redirect(url_for('login'))
     return render_template('dashboard.html')
 
-# New Patient Route
 @app.route('/new_patient', methods=['GET', 'POST'])
 def new_patient():
     if 'user' not in session:
         return redirect(url_for('login'))
+
     if request.method == 'POST':
         name = request.form['name']
         age = request.form['age']
@@ -244,50 +242,58 @@ def new_patient():
             import time
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 
-            with mlflow.start_run(run_name=f"Diagnosis_{name}_{timestamp}"):
-                mlflow.set_tag("patient_name", name)
-                mlflow.set_tag("framework_version", tf.__version__)
-                mlflow.set_tag("python_version", platform.python_version())
-                mlflow.log_param("model_path", MODEL_PATH)
-                mlflow.log_param("image_filename", filename)
-                mlflow.log_param("model_type", "CNN-5layer")
-                mlflow.log_param("image_size", "224x224")
-                mlflow.log_param("preprocessing", "rescale + CLAHE")
-                mlflow.log_param("augmentation", "rotation, zoom, flip")
-                mlflow.log_param("doctor_input_eye_issue", eye_issue)
-                mlflow.log_param("diabetes_duration", duration)
-                mlflow.log_param("optimizer", "Adam")
-                mlflow.log_param("learning_rate", 0.0001)
-                mlflow.log_param("batch_size", 32)
+            # Model Inference
+            img_array = preprocess_image(image_path)
+            prediction = model.predict(img_array)[0]
+            logger.info(f"Prediction made for patient '{name}' with result: {prediction}")
 
+            # Generate Insights & PDF
+            insights = generate_insights(prediction)
+            pdf_report_path = generate_pdf(name, age, gender, eye_issue, diabetes, duration, image_path, insights)
+            full_pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], os.path.basename(pdf_report_path))
+            logger.info(f"PDF report generated for patient '{name}' at '{pdf_report_path}'")
 
-                # Model Inference
-                img_array = preprocess_image(image_path)
-                prediction = model.predict(img_array)[0]
-                logger.info(f"Prediction made for patient '{name}' with result: {prediction}")
+            # Safe MLflow logging (if enabled)
+            if mlflow_enabled:
+                try:
+                    with mlflow.start_run(run_name=f"Diagnosis_{name}_{timestamp}"):
+                        mlflow.set_tag("patient_name", name)
+                        mlflow.set_tag("framework_version", tf.__version__)
+                        mlflow.set_tag("python_version", platform.python_version())
+                        mlflow.log_param("model_path", MODEL_PATH)
+                        mlflow.log_param("image_filename", filename)
+                        mlflow.log_param("model_type", "CNN-5layer")
+                        mlflow.log_param("image_size", "224x224")
+                        mlflow.log_param("preprocessing", "rescale + CLAHE")
+                        mlflow.log_param("augmentation", "rotation, zoom, flip")
+                        mlflow.log_param("doctor_input_eye_issue", eye_issue)
+                        mlflow.log_param("diabetes_duration", duration)
+                        mlflow.log_param("optimizer", "Adam")
+                        mlflow.log_param("learning_rate", 0.0001)
+                        mlflow.log_param("batch_size", 32)
 
-                # Log metrics
-                max_confidence = float(np.max(prediction)) * 100
-                predicted_label = np.argmax(prediction)
-                mlflow.log_metric("max_confidence", max_confidence)
-                mlflow.log_metric("predicted_class", predicted_label)
-                mlflow.log_metric("no_dr_conf", float(prediction[0]) * 100)
-                mlflow.log_metric("mild_conf", float(prediction[1]) * 100)
-                mlflow.log_metric("moderate_conf", float(prediction[2]) * 100)
-                mlflow.log_metric("severe_conf", float(prediction[3]) * 100)
-                mlflow.log_metric("proliferative_conf", float(prediction[4]) * 100)
+                        # Log metrics
+                        max_confidence = float(np.max(prediction)) * 100
+                        predicted_label = np.argmax(prediction)
+                        mlflow.log_metric("max_confidence", max_confidence)
+                        mlflow.log_metric("predicted_class", predicted_label)
+                        mlflow.log_metric("no_dr_conf", float(prediction[0]) * 100)
+                        mlflow.log_metric("mild_conf", float(prediction[1]) * 100)
+                        mlflow.log_metric("moderate_conf", float(prediction[2]) * 100)
+                        mlflow.log_metric("severe_conf", float(prediction[3]) * 100)
+                        mlflow.log_metric("proliferative_conf", float(prediction[4]) * 100)
 
+                        # Register model only once per app session
+                        if not hasattr(app, 'model_registered'):
+                            mlflow.keras.log_model(model, artifact_path="model", registered_model_name="DR_Diagnosis_CNN")
+                            app.model_registered = True
+                            logger.info("[MLflow] Model registered.")
 
-                # Generate Insights & PDF
-                insights = generate_insights(prediction)
-                pdf_report_path = generate_pdf(name, age, gender, eye_issue, diabetes, duration, image_path, insights)
-                logger.info(f"PDF report generated for patient '{name}' at '{pdf_report_path}'")
-
-                # Log report as artifact
-                full_pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], os.path.basename(pdf_report_path))
-                mlflow.log_artifact(full_pdf_path)
-
-
+                        # Log the report PDF
+                        mlflow.log_artifact(full_pdf_path)
+                        logger.info("[MLflow] Run logged successfully.")
+                except Exception as e:
+                    logger.warning(f"[MLflow] Logging failed: {str(e)}")
 
             # Save to Database
             conn = sqlite3.connect('users.db')
@@ -296,12 +302,12 @@ def new_patient():
                         (name, age, gender, eye_issue, diabetes, duration, image_path, diagnosed_by, diagnosis_result, pdf_report_path) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                       (name, age, gender, eye_issue, diabetes, duration, image_path, diagnosed_by, "Pending", pdf_report_path))
-            patient_id = c.lastrowid  # Get the ID of the newly inserted patient
+            patient_id = c.lastrowid
             conn.commit()
             conn.close()
 
-            # Redirect to result.html for this specific patient
             return redirect(url_for('view_patient', patient_id=patient_id))
+
     return render_template('new_patient.html')
 
 # Upload file
