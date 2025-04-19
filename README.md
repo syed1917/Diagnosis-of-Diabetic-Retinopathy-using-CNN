@@ -289,3 +289,6 @@ docker push gmwrites/aiml2025:final
 
 ✔ Database persists user and patient records (users.db mounted). 
 
+### To access ml-flow (Important to run this in docker cli after running the image in container)
+
+- mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 5050
